@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import os
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
+from operators import (TransformOperator)
 
 default_args = {
     'owner': 'Raymond Kalonji',
@@ -23,7 +24,15 @@ dag = DAG('credilytics',
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 
 create_tables = DummyOperator(task_id='create_tables',  dag=dag)
-transform_data = DummyOperator(task_id='transform_data',  dag=dag)
+transform_data = TransformOperator(
+    task_id='transform_data',
+    s3_bucket='credilitycs',
+    s3_input_key='input/credit_data.csv',
+    s3_output_folder='output',
+    region='us-west-2',
+    aws_credentials_id='aws_credentials',
+    dag=dag
+)
 load_accounts_fact = DummyOperator(task_id='load_accounts_fact',  dag=dag)
 load_delinquencies_dimension = DummyOperator(task_id='load_delinquencies_dimension',  dag=dag)
 load_finances_dimension = DummyOperator(task_id='load_finances_dimension',  dag=dag)
@@ -39,4 +48,3 @@ load_accounts_fact >> load_delinquencies_dimension >> check_data_quality
 load_accounts_fact >> load_finances_dimension >> check_data_quality
 load_accounts_fact >> load_demographics_dimension >> check_data_quality
 check_data_quality >> end_operator
-
