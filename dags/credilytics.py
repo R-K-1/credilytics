@@ -22,7 +22,8 @@ dag = DAG('credilytics',
 
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 
-extract_and_stage = DummyOperator(task_id='extract_and_stage',  dag=dag)
+create_tables = DummyOperator(task_id='create_tables',  dag=dag)
+transform_data = DummyOperator(task_id='transform_data',  dag=dag)
 load_accounts_fact = DummyOperator(task_id='load_accounts_fact',  dag=dag)
 load_delinquencies_dimension = DummyOperator(task_id='load_delinquencies_dimension',  dag=dag)
 load_finances_dimension = DummyOperator(task_id='load_finances_dimension',  dag=dag)
@@ -31,8 +32,9 @@ check_data_quality = DummyOperator(task_id='check_data_quality',  dag=dag)
 
 end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
 
-start_operator >> extract_and_stage
-extract_and_stage >> load_accounts_fact
+start_operator >> create_tables
+create_tables >> transform_data
+transform_data >> load_accounts_fact
 load_accounts_fact >> load_delinquencies_dimension >> check_data_quality
 load_accounts_fact >> load_finances_dimension >> check_data_quality
 load_accounts_fact >> load_demographics_dimension >> check_data_quality
