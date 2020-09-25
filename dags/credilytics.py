@@ -31,3 +31,10 @@ check_data_quality = DummyOperator(task_id='check_data_quality',  dag=dag)
 
 end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
 
+start_operator >> extract_and_stage
+extract_and_stage >> load_accounts_fact
+load_accounts_fact >> load_delinquencies_dimension >> check_data_quality
+load_accounts_fact >> load_finances_dimension >> check_data_quality
+load_accounts_fact >> load_demographics_dimension >> check_data_quality
+check_data_quality >> end_operator
+
