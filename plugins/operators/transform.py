@@ -40,24 +40,20 @@ class TransformOperator(BaseOperator):
         aws_hook = AwsHook(self.aws_credentials_id)
         credentials = aws_hook.get_credentials()
         
-        self.log.info("Transforming input data and storing it into staging area")
+        self.log.info("SETTING UP SPARK")
         
         os.environ['AWS_ACCESS_KEY_ID'] = Variable.get('aws_access_key_id')
         os.environ['AWS_SECRET_ACCESS_KEY']= Variable.get('aws_secret_key_id')
 
+        
         spark = SparkSession \
             .builder \
             .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:2.7.0") \
             .getOrCreate()
-        
-        spark_context = spark.sparkContext
-        hadoop_conf = spark_context._jsc.hadoopConfiguration()
-        hadoop_conf.set("fs.s3a.awsAccessKeyId", Variable.get('aws_access_key_id'))
-        hadoop_conf.set("fs.s3a.awsSecretAccessKey", Variable.get('aws_secret_key_id'))
-        
+
         rendered_key = self.s3_input_key.format(**context)
         s3_path = "s3a://{}/{}".format(self.s3_bucket, rendered_key)
-        self.log.info("S3 PATH IS {}".format(s3_path))
+        self.log.info("S3 PATH FOR PD2 IS {}".format(s3_path))
         
         df = spark.read.csv(s3_path)
         self.log.info(df.printSchema())

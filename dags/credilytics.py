@@ -26,7 +26,7 @@ start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 create_tables = DummyOperator(task_id='create_tables',  dag=dag)
 transform_data = TransformOperator(
     task_id='transform_data',
-    s3_bucket='credilitycs',
+    s3_bucket='credilytics',
     s3_input_key='input/credit_data.csv',
     s3_output_folder='output',
     region='us-west-2',
