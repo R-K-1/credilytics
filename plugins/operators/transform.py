@@ -59,6 +59,7 @@ class TransformOperator(BaseOperator):
         self.log.info("S3 PATH FOR PD IS {}".format(s3_input_file_path))
         
         credit_data_schema = StructType([
+            StructField("RowNumber", IntegerType(), True),
             StructField("RevolvingUtilizationOfUnsecuredLines", DoubleType(), True),
             StructField("age", IntegerType(), True),
             StructField("NumberOfTime30-59DaysPastDueNotWorse", IntegerType(), True),
@@ -71,12 +72,15 @@ class TransformOperator(BaseOperator):
             StructField("NumberOfDependents", IntegerType(), True),
         ])
         df = spark.read.json(s3_input_file_path, schema=credit_data_schema)
-        df2 = df.withColumn("account_id", lit(str(uuid.uuid4())))
-        self.log.info(df2.printSchema())
+        df = df.withColumn("account_id", lit(str(uuid.uuid4())))
+        df = df.select("RevolvingUtilizationOfUnsecuredLines", "age", "NumberOfTime30-59DaysPastDueNotWorse",
+                            "DebtRatio", "MonthlyIncome", "NumberOfOpenCreditLinesAndLoans", "NumberOfTimes90DaysLate",
+                            "NumberRealEstateLoansOrLines", "NumberOfTime60-89DaysPastDueNotWorse", "NumberOfDependents")
+        self.log.info(df.printSchema())
 
         s3_output_file_path = "s3a://{}/{}/stage_table.parquet".format(self.s3_bucket, self.s3_staging_folder)
 
-        df2.write.parquet(
+        df.write.parquet(
             s3_output_file_path,
             mode="overwrite",
         )
