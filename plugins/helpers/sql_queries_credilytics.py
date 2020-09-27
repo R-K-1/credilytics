@@ -1,4 +1,12 @@
-class SqlQueriesCreditlytics:
+class SqlQueriesCredilytics:
+    create_accounts = f"""
+        drop table if exists stage;
+        create table stage (
+            year int
+        );
+        """
+    
+    
     create_accounts = f"""
         drop table if exists accounts;
         create table accounts (

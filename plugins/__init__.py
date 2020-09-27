@@ -3,15 +3,11 @@ from airflow.plugins_manager import AirflowPlugin
 import operators
 import helpers
 # Defining the plugin class
-class UdacityPlugin(AirflowPlugin):
-    name = "udacity_plugin"
+class CredilyticsPlugin(AirflowPlugin):
+    name = "credilytics_plugin"
     operators = [
-        operators.StageToRedshiftOperator,
-        operators.LoadFactOperator,
-        operators.LoadDimensionOperator,
-        operators.DataQualityOperator,
         operators.TransformOperator
     ]
     helpers = [
-        helpers.SqlQueries
+        helpers.SqlQueriesCredilytics
     ]
