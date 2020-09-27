@@ -9,5 +9,5 @@ class CredilyticsPlugin(AirflowPlugin):
         operators.TransformOperator
     ]
     helpers = [
-        helpers.SqlQueriesCredilytics
+        helpers.SqlQueries
     ]

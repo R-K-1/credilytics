@@ -1,5 +1,5 @@
-from helpers.sql_queries_credilytics import SqlQueriesCredilytics
+from helpers.sql_queries import SqlQueries
 
 __all__ = [
-    'SqlQueriesCredilytics'
+    'SqlQueries'
 ]
