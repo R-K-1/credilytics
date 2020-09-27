@@ -6,6 +6,7 @@ import helpers
 class CredilyticsPlugin(AirflowPlugin):
     name = "credilytics_plugin"
     operators = [
+        operators.StageToRedshiftOperator,
         operators.TransformOperator
     ]
     helpers = [

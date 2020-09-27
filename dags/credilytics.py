@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import os
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
-from operators import (TransformOperator)
+from operators import (StageToRedshiftOperator, TransformOperator)
 from airflow.operators import (PostgresOperator)
 
 default_args = {
@@ -41,6 +41,17 @@ create_tables = PostgresOperator(
     dag=dag
 )
 
+load_into_stage_table = StageToRedshiftOperator(
+    task_id='load_into_stage_table',
+    table='stage',
+    s3_bucket='credilytics',
+    s3_key='staging/stage_table.parquet',
+    region='us-west-2',
+    redshift_conn_id='redshift',
+    aws_credentials_id='aws_credentials',
+    dag=dag
+)
+
 load_accounts_fact = DummyOperator(task_id='load_accounts_fact',  dag=dag)
 load_delinquencies_dimension = DummyOperator(task_id='load_delinquencies_dimension',  dag=dag)
 load_finances_dimension = DummyOperator(task_id='load_finances_dimension',  dag=dag)
@@ -51,7 +62,8 @@ end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
 
 start_operator >> transform_data
 transform_data >> create_tables
-create_tables >> load_accounts_fact
+create_tables >> load_into_stage_table
+load_into_stage_table >> load_accounts_fact
 load_accounts_fact >> load_delinquencies_dimension >> check_data_quality
 load_accounts_fact >> load_finances_dimension >> check_data_quality
 load_accounts_fact >> load_demographics_dimension >> check_data_quality
