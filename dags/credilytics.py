@@ -3,6 +3,7 @@ import os
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from operators import (TransformOperator)
+from airflow.operators import (PostgresOperator)
 
 default_args = {
     'owner': 'Raymond Kalonji',
@@ -33,7 +34,12 @@ transform_data = TransformOperator(
     dag=dag
 )
 
-create_tables = DummyOperator(task_id='create_tables',  dag=dag)
+create_tables = PostgresOperator(
+    task_id="create_tables",
+    postgres_conn_id="redshift",
+    sql="create_tables.sql",
+    dag=dag
+)
 
 load_accounts_fact = DummyOperator(task_id='load_accounts_fact',  dag=dag)
 load_delinquencies_dimension = DummyOperator(task_id='load_delinquencies_dimension',  dag=dag)
