@@ -1,5 +1,6 @@
 import os
 from airflow.hooks.postgres_hook import PostgresHook
+from airflow.hooks.base_hook import BaseHook
 from airflow.models import BaseOperator, Variable
 from airflow.utils.decorators import apply_defaults
 from airflow.contrib.hooks.aws_hook import AwsHook
@@ -41,9 +42,9 @@ class TransformOperator(BaseOperator):
         credentials = aws_hook.get_credentials()
         
         self.log.info("SETTING UP SPARK")
-        
-        os.environ['AWS_ACCESS_KEY_ID'] = Variable.get('aws_access_key_id')
-        os.environ['AWS_SECRET_ACCESS_KEY']= Variable.get('aws_secret_key_id')
+        aws_credentials_conn = BaseHook.get_connection("aws_credentials")      
+        os.environ['AWS_ACCESS_KEY_ID'] = aws_credentials_conn.login
+        os.environ['AWS_SECRET_ACCESS_KEY']= aws_credentials_conn.password
 
         
         spark = SparkSession \
@@ -53,7 +54,7 @@ class TransformOperator(BaseOperator):
 
         rendered_key = self.s3_input_key.format(**context)
         s3_path = "s3a://{}/{}".format(self.s3_bucket, rendered_key)
-        self.log.info("S3 PATH FOR PD2 IS {}".format(s3_path))
+        self.log.info("S3 PATH FOR PD IS {}".format(s3_path))
         
         df = spark.read.csv(s3_path)
         self.log.info(df.printSchema())
