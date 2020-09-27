@@ -1,11 +1,13 @@
-import os
+import os, uuid
 from airflow.hooks.postgres_hook import PostgresHook
 from airflow.hooks.base_hook import BaseHook
 from airflow.models import BaseOperator, Variable
 from airflow.utils.decorators import apply_defaults
 from airflow.contrib.hooks.aws_hook import AwsHook
-from pyspark.sql import SparkSession
 from pyspark import SparkContext, SparkConf
+from pyspark.sql import SparkSession
+from pyspark.sql.types import ( StructType, StructField, DoubleType, IntegerType)
+from pyspark.sql.functions import lit
 
 class TransformOperator(BaseOperator):
     ui_color = '#358140'
@@ -23,7 +25,7 @@ class TransformOperator(BaseOperator):
     def __init__(self,
                  s3_bucket="",
                  s3_input_key="",
-                 s3_output_folder="",
+                 s3_staging_folder="",
                  region="",
                  aws_credentials_id="",
                  *args, **kwargs):
@@ -31,7 +33,7 @@ class TransformOperator(BaseOperator):
         super(TransformOperator, self).__init__(*args, **kwargs)
         self.s3_bucket = s3_bucket
         self.s3_input_key = s3_input_key
-        self.s3_output_folder = s3_output_folder
+        self.s3_staging_folder = s3_staging_folder
         self.region = region
         self.aws_credentials_id = aws_credentials_id
 
@@ -53,8 +55,28 @@ class TransformOperator(BaseOperator):
             .getOrCreate()
 
         rendered_key = self.s3_input_key.format(**context)
-        s3_path = "s3a://{}/{}".format(self.s3_bucket, rendered_key)
-        self.log.info("S3 PATH FOR PD IS {}".format(s3_path))
+        s3_input_file_path = "s3a://{}/{}".format(self.s3_bucket, rendered_key)
+        self.log.info("S3 PATH FOR PD IS {}".format(s3_input_file_path))
         
-        df = spark.read.csv(s3_path)
-        self.log.info(df.printSchema())
+        credit_data_schema = StructType([
+            StructField("RevolvingUtilizationOfUnsecuredLines", DoubleType(), True),
+            StructField("age", IntegerType(), True),
+            StructField("NumberOfTime30-59DaysPastDueNotWorse", IntegerType(), True),
+            StructField("DebtRatio", DoubleType(), True),
+            StructField("MonthlyIncome", IntegerType(), True),
+            StructField("NumberOfOpenCreditLinesAndLoans", IntegerType(), True),
+            StructField("NumberOfTimes90DaysLate", IntegerType(), True),
+            StructField("NumberRealEstateLoansOrLines", IntegerType(), True),
+            StructField("NumberOfTime60-89DaysPastDueNotWorse", IntegerType(), True),
+            StructField("NumberOfDependents", IntegerType(), True),
+        ])
+        df = spark.read.json(s3_input_file_path, schema=credit_data_schema)
+        df2 = df.withColumn("account_id", lit(str(uuid.uuid4())))
+        self.log.info(df2.printSchema())
+
+        s3_output_file_path = "s3a://{}/{}/stage_table.parquet".format(self.s3_bucket, self.s3_staging_folder)
+
+        df2.write.parquet(
+            s3_output_file_path,
+            mode="overwrite",
+        )
