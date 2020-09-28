@@ -90,11 +90,11 @@ class TransformOperator(BaseOperator):
         ])
         
         df = spark.read.json(s3_input_file_path, schema=credit_data_schema)
-        df = df.withColumn("account_id", lit(str(uuid.uuid4())))
+        df = df.withColumn("BorrowerId", lit(str(uuid.uuid4())))
         df = df.select("SeriousDlqin2yrs", "RevolvingUtilizationOfUnsecuredLines", "age", "NumberOfTime30-59DaysPastDueNotWorse",
                             "DebtRatio", "MonthlyIncome", "NumberOfOpenCreditLinesAndLoans", "NumberOfTimes90DaysLate",
                             "NumberRealEstateLoansOrLines", "NumberOfTime60-89DaysPastDueNotWorse", "NumberOfDependents",
-                            "account_id")
+                            "BorrowerId")
 
         s3_output_file_path = "s3a://{}/{}/stage_table.parquet".format(self.s3_bucket, self.s3_staging_folder)
 
