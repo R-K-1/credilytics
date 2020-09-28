@@ -29,8 +29,8 @@ start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 
 transform_data = TransformOperator(
     task_id='transform_data',
-    s3_bucket='credilytics',
-    s3_input_key='input/credit_data.csv',
+    s3_bucket=Variable.get('bucket_name'),
+    s3_input_key='input/cs-training.csv',
     s3_staging_folder='staging',
     region='us-west-2',
     aws_credentials_id='aws_credentials',
@@ -47,7 +47,7 @@ create_tables = PostgresOperator(
 load_into_stage_table = StageToRedshiftOperator(
     task_id='load_into_stage_table',
     table='stage',
-    s3_bucket='credilytics',
+    s3_bucket=Variable.get('bucket_name'),
     s3_key='staging/stage_table.parquet',
     region='us-west-2',
     redshift_conn_id='redshift',
