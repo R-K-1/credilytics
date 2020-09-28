@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS public.stage (
   CONSTRAINT stage_pkey PRIMARY KEY (BorrowerId)
 );
 
-DROP TABLE IF EXISTS public.accounts;
-CREATE TABLE IF NOT EXISTS public.accounts (
+DROP TABLE IF EXISTS public.borrowers;
+CREATE TABLE IF NOT EXISTS public.borrowers (
   BorrowerId varchar(256) NOT NULL,
   CONSTRAINT accounts_pkey PRIMARY KEY (BorrowerId)
 );

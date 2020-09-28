@@ -1,0 +1,2 @@
+SELECT BorrowerId
+FROM stage;
