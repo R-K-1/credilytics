@@ -17,7 +17,19 @@ The following are some questions that can be asked with the data:
 * What is the average household income of customers with a 60-89 days delinquency?
 
 ## Setup
-## TODO
+
+* Download `cs-training.csv` dataset and then upload it to `<s3-bucket-name>/input`
+* Create `<s3-bucket-name>/staging` folder
+* Set up a Redshift Cluster with the permission to read from S3
+* Set up Apache Airflow
+* Set up Spark
+* Install Pyspark Python module
+* Create the following Connections in Airflow
+	* `redshift` : with the information necessary to connect to a redshift cluster
+    * `aws_credentials` : with the credentials for an IAM user able to read and write to `<s3-bucket-name>`
+* Create the following Variables in Airflow
+	* `bucket_name` : with the name of the bucket where the input data is uploaded and the stage data will be written
+    * `number_of_rows`: the data quality checks needs this variable
 
 ## Source Data
 
@@ -121,4 +133,44 @@ Eventually this project may have to address the following scenarios as it grows 
 * **The pipelines would be run on a daily basis by 7am every day.** The parameters in the DAG would have to be changed to run at a higher frequency (using the `schedule_interval` parameter), which also may entail having to increasing the maximum number of concurrent DAG runs if each run takes longer than a day.
 
 ## Example Queries
-## TODO
+
+**How many percent of customers under 30 years old have have had a serious delinquency?**
+
+```
+SELECT b.BorrowerId
+FROM borrowers b
+INNER JOIN delinquencies d
+ON b.BorrowerId=d.BorrowerId
+AND d.SeriousDlqin2yrs = '1'
+LIMIT 10
+```
+
+**What is the average number of loans and open credit lines for homeowners?**
+
+```
+SELECT AVG(f.NumberOfOpenCreditLinesAndLoans)
+FROM finances f
+WHERE f.NumberRealEstateLoansOrLines > 0
+```
+
+**How many percent of customers with two or more dependents have had a 30-59 days delinquency?**
+
+```
+SELECT ROUND(
+  100.0 * (
+      SUM(CASE WHEN (dem.NumberOfDependents > 1 AND del.NumberOfTime3059DaysPastDueNotWorse > 0) THEN 1 ELSE 0 END) / 
+    		COUNT(CASE WHEN (dem.NumberOfDependents > 1) THEN 1 ELSE 0 END)
+	), 1) AS percent_total
+FROM demographics dem
+INNER JOIN delinquencies del
+ON dem.BorrowerId=del.BorrowerId
+```
+
+**What is the average household income of customers with a 60-89 days delinquency?**
+
+```
+SELECT AVG(f.MonthlyIncome)
+FROM finances f
+INNER JOIN delinquencies d
+ON f.BorrowerId = d.BorrowerId
+```
