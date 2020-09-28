@@ -35,7 +35,7 @@ financial hardship. [Give Me Some Credit](https://www.kaggle.com/c/GiveMeSomeCre
 
 ## Data Model
 
-This project generates 5 tables in a Postgres database:
+This project generates five tables in a Postgres database:
 
 1. `stage`: all data is loaded here first for rapid insertion into other tables
     * `SeriousDlqin2yrs`: Person experienced 90 days past due delinquency or worse 
@@ -77,6 +77,24 @@ This project generates 5 tables in a Postgres database:
 
 ## Project Structure
 
+### Source Code
+
+```bash
+├── README.md - This file.
+├── dags # Python script containing the tasks and depencdencies of the DAG
+	└── credilitycs.py # Python script containing the tasks and depencdencies of the DAG
+├── plugins
+	├── helpers
+		├── __init__.py
+		├── sql_queries.py # Defining prepared and reusable SQL queries
+    ├── operators
+		├── __init__.py
+		├── data_quality.py # with `DataQualityOperator`, running data quality check by passing an array of SQL queries and an expected result as arguments, failing if the result of any query does not match the expected one.
+		├── load.py # with `LoadOperator`, loading a dimension or fact table from data in the stage table.
+		├── transform.py # with `TransformOperator`, loading the original CSV into a DataFrame, appending a UUID to each row and saving the result in parquet format.
+		└── stage_redshift.py # with `StageToRedshiftOperator`, Loading the parquet datda into the stage table of the data warehouse inside the Redshift cluster
+```
+
 ### ETL
 
 * Spark used Pandas to read input CSV from S3 into a DataFrame
@@ -96,9 +114,11 @@ This project generates 5 tables in a Postgres database:
 * **Redshift** is used to host the data warehouse because of its ability to handle OLAP for big data
 
 ## Potential Scenarios
-## TODO
 
 Eventually this project may have to address the following scenarios as it grows and evolves in its use:
+
+* **The ETL process needs to be completed faster** The intermediate step storing the data in parquet may need to be eliminated and the data uploaded directly to the warehouse
+* **The pipelines would be run on a daily basis by 7am every day.** The parameters in the DAG would have to be changed to run at a higher frequency (using the `schedule_interval` parameter), which also may entail having to increasing the maximum number of concurrent DAG runs if each run takes longer than a day.
 
 ## Example Queries
 ## TODO
