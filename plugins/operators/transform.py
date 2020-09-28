@@ -75,7 +75,8 @@ class TransformOperator(BaseOperator):
         
         df = spark.read.format("csv").option("delimiter",",").option("header", "true").schema(credit_data_schema).load(s3_input_file_path)
         df = df.withColumn("BorrowerId", monotonically_increasing_id())
-        self.log.info(df.count())
+        df = df.replace("NA", "0")
+
         Variable.set("number_of_rows", int(df.count()))
         df = df.select("SeriousDlqin2yrs", "RevolvingUtilizationOfUnsecuredLines", "age", "NumberOfTime30-59DaysPastDueNotWorse",
                             "DebtRatio", "MonthlyIncome", "NumberOfOpenCreditLinesAndLoans", "NumberOfTimes90DaysLate",
