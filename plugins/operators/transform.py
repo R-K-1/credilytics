@@ -7,7 +7,7 @@ from airflow.contrib.hooks.aws_hook import AwsHook
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession
 from pyspark.sql.types import ( StructType, StructField, DoubleType, IntegerType, BooleanType, StringType)
-from pyspark.sql.functions import lit
+from pyspark.sql.functions import lit, monotonically_increasing_id
 
 class TransformOperator(BaseOperator):
     ui_color = '#358140'
@@ -58,22 +58,6 @@ class TransformOperator(BaseOperator):
         s3_input_file_path = "s3a://{}/{}".format(self.s3_bucket, rendered_key)
         self.log.info("S3 PATH FOR PD IS {}".format(s3_input_file_path))
         
-        """
-        credit_data_schema = StructType([
-            StructField("RowNumber", IntegerType(), True),
-            StructField("SeriousDlqin2yrs", IntegerType(), True),
-            StructField("RevolvingUtilizationOfUnsecuredLines", DoubleType(), True),
-            StructField("age", IntegerType(), True),
-            StructField("NumberOfTime30-59DaysPastDueNotWorse", IntegerType(), True),
-            StructField("DebtRatio", DoubleType(), True),
-            StructField("MonthlyIncome", IntegerType(), True),
-            StructField("NumberOfOpenCreditLinesAndLoans", IntegerType(), True),
-            StructField("NumberOfTimes90DaysLate", IntegerType(), True),
-            StructField("NumberRealEstateLoansOrLines", IntegerType(), True),
-            StructField("NumberOfTime60-89DaysPastDueNotWorse", IntegerType(), True),
-            StructField("NumberOfDependents", IntegerType(), True),
-        ])
-        """
         credit_data_schema = StructType([
             StructField("RowNumber", StringType(), True),
             StructField("SeriousDlqin2yrs", StringType(), True),
@@ -89,8 +73,10 @@ class TransformOperator(BaseOperator):
             StructField("NumberOfDependents", StringType(), True),
         ])
         
-        df = spark.read.json(s3_input_file_path, schema=credit_data_schema)
-        df = df.withColumn("BorrowerId", lit(str(uuid.uuid4())))
+        df = spark.read.format("csv").option("delimiter",",").option("header", "true").schema(credit_data_schema).load(s3_input_file_path)
+        df = df.withColumn("BorrowerId", monotonically_increasing_id())
+        self.log.info(df.count())
+        Variable.set("number_of_rows", int(df.count()))
         df = df.select("SeriousDlqin2yrs", "RevolvingUtilizationOfUnsecuredLines", "age", "NumberOfTime30-59DaysPastDueNotWorse",
                             "DebtRatio", "MonthlyIncome", "NumberOfOpenCreditLinesAndLoans", "NumberOfTimes90DaysLate",
                             "NumberRealEstateLoansOrLines", "NumberOfTime60-89DaysPastDueNotWorse", "NumberOfDependents",

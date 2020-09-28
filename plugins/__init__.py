@@ -8,7 +8,8 @@ class CredilyticsPlugin(AirflowPlugin):
     operators = [
         operators.StageToRedshiftOperator,
         operators.TransformOperator,
-        operators.LoadOperator
+        operators.LoadOperator,
+        operators.DataQualityOperator
     ]
     helpers = [
         helpers.SqlQueries

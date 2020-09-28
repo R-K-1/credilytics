@@ -2,54 +2,82 @@ class SqlQueries:
     create_tables = ("""
         DROP TABLE IF EXISTS public.stage;
         CREATE TABLE IF NOT EXISTS public.stage (
-            SeriousDlqin2yrs varchar(256) NOT NULL,
-            RevolvingUtilizationOfUnsecuredLines varchar(256) NOT NULL,
-            age varchar(256) NOT NULL,
-            NumberOfTime30-59DaysPastDueNotWorse varchar(256) NOT NULL,
-            DebtRatio varchar(256) NOT NULL,
-            MonthlyIncome varchar(256) NOT NULL,
-            NumberOfOpenCreditLinesAndLoans varchar(256) NOT NULL,
-            NumberOfTimes90DaysLate varchar(256) NOT NULL,
-            NumberRealEstateLoansOrLines varchar(256) NOT NULL,
-            NumberOfTime60-89DaysPastDueNotWorse varchar(256) NOT NULL,
-            NumberOfDependents varchar(256) NOT NULL,
-            AccountId varchar(256) NOT NULL,
-            CONSTRAINT stage_pkey PRIMARY KEY (AccountId)
+            SeriousDlqin2yrs VARCHAR(100),
+            RevolvingUtilizationOfUnsecuredLines VARCHAR(100),
+            age VARCHAR(100),
+            NumberOfTime3059DaysPastDueNotWorse VARCHAR(100),
+            DebtRatio VARCHAR(100),
+            MonthlyIncome VARCHAR(100),
+            NumberOfOpenCreditLinesAndLoans VARCHAR(100),
+            NumberOfTimes90DaysLate VARCHAR(100),
+            NumberRealEstateLoansOrLines VARCHAR(100),
+            NumberOfTime6089DaysPastDueNotWorse VARCHAR(100),
+            NumberOfDependents VARCHAR(100),
+            BorrowerId BIGINT NOT NULL,
+            CONSTRAINT stage_pkey PRIMARY KEY (BorrowerId)
+        );
+
+        DROP TABLE IF EXISTS public.borrowers;
+        CREATE TABLE IF NOT EXISTS public.borrowers (
+            BorrowerId BIGINT NOT NULL,
+            CONSTRAINT accounts_pkey PRIMARY KEY (BorrowerId)
+        );
+
+        DROP TABLE IF EXISTS public.demographics;
+        CREATE TABLE IF NOT EXISTS public.demographics (
+            age VARCHAR(100),
+            NumberOfDependents VARCHAR(100),
+            BorrowerId BIGINT NOT NULL,
+            CONSTRAINT demographics_pkey PRIMARY KEY (BorrowerId)
+        );
+
+        DROP TABLE IF EXISTS public.finances;
+        CREATE TABLE IF NOT EXISTS public.finances (
+            RevolvingUtilizationOfUnsecuredLines VARCHAR(100),
+            DebtRatio VARCHAR(100),
+            MonthlyIncome VARCHAR(100),
+            NumberOfOpenCreditLinesAndLoans VARCHAR(100),
+            NumberRealEstateLoansOrLines VARCHAR(100),
+            BorrowerId BIGINT NOT NULL,
+            CONSTRAINT finances_pkey PRIMARY KEY (BorrowerId)
+        );
+
+        DROP TABLE IF EXISTS public.delinquencies;
+        CREATE TABLE IF NOT EXISTS public.delinquencies (
+            SeriousDlqin2yrs VARCHAR(100),
+            NumberOfTime3059DaysPastDueNotWorse VARCHAR(100),
+            NumberOfTimes90DaysLate VARCHAR(100),
+            NumberOfTime6089DaysPastDueNotWorse VARCHAR(100),
+            BorrowerId BIGINT NOT NULL,
+            CONSTRAINT delinquencies_pkey PRIMARY KEY (BorrowerId)
         );
     """)
     
-    create_stage = ("""
-        drop table if exists stage;
-        create table stage (
-            year int
-        );
+    borrowers_table_insert = ("""
+        SELECT BorrowerId
+        FROM stage
+        """)    
+    
+    demographics_table_insert = ("""
+        SELECT age, NumberOfDependents, BorrowerId
+        FROM stage
+        """)
+
+    finances_table_insert = ("""
+        SELECT RevolvingUtilizationOfUnsecuredLines, DebtRatio, MonthlyIncome,
+            NumberOfOpenCreditLinesAndLoans, NumberRealEstateLoansOrLines,BorrowerId
+        FROM stage
+        """)
+
+    delinquencies_tables_insert = ("""
+        SELECT SeriousDlqin2yrs, NumberOfTime3059DaysPastDueNotWorse, NumberOfTimes90DaysLate,
+            NumberOfTime6089DaysPastDueNotWorse, BorrowerId
+        FROM stage
         """)
     
-    
-    create_accounts = ("""
-        drop table if exists accounts;
-        create table accounts (
-            year int
-        );
-        """)
-
-    create_delinquencies_fact = ("""
-        drop table if exists delinquencies;
-        create table delinquencies (
-            year int
-        );
-        """)
-
-    create_finances_fact = ("""
-        drop table if exists finances;
-        create table finances (
-            year int
-        );
-        """)
-
-    create_demographics_fact = ("""
-        drop table if exists demographics;
-        create table demographics (
-            year int
-        );
-        """)
+    data_quality_check_queries = [
+        'SELECT COUNT(BorrowerId) FROM stage',
+        'SELECT COUNT(BorrowerId) FROM borrowers',
+        'SELECT COUNT(BorrowerId) FROM demographics',
+        'SELECT COUNT(BorrowerId) FROM finances',
+        'SELECT COUNT(BorrowerId) FROM delinquencies']
