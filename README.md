@@ -33,7 +33,7 @@ The following are some questions that can be answered by the data:
 
 ## Source Data
 
-This project draws on historical borrowers data provided for a Kaggle competition
+This project draws on historical borrower's data provided for a Kaggle competition
 aiming to build an algorithm predicting the likelihood of a borrower experiencing
 financial hardship. [Give Me Some Credit](https://www.kaggle.com/c/GiveMeSomeCredit/overview)
 
@@ -54,7 +54,7 @@ This project generates five tables in a Postgres database:
     * `RevolvingUtilizationOfUnsecuredLines`: Total balance on credit cards and personal lines of credit except real estate and no installment debt like car loans divided by the sum of credit limits
     * `age`: Age of borrower in years
     * `NumberOfTime3059DaysPastDueNotWorse`: Number of times borrower has been 30-59 days past due but no worse in the last 2 years.
-    * `DebtRatio`: Monthly debt payments, alimony,living costs divided by monthy gross income
+    * `DebtRatio`: Monthly debt payments, alimony, living costs divided by monthy gross income
     * `MonthlyIncome`: Monthly income
     * `NumberOfOpenCreditLinesAndLoans`: Number of Open loans (installment like car loan or mortgage) and Lines of credit (e.g. credit cards)
     * `NumberOfTimes90DaysLate`: Number of times borrower has been 90 days or more past due.
@@ -73,7 +73,7 @@ This project generates five tables in a Postgres database:
     
 4. `finances`: financial information of each borrower
     * `RevolvingUtilizationOfUnsecuredLines`: Total balance on credit cards and personal lines of credit except real estate and no installment debt like car loans divided by the sum of credit limits
-    * `DebtRatio`: Monthly debt payments, alimony,living costs divided by monthy gross income
+    * `DebtRatio`: Monthly debt payments, alimony, living costs divided by monthy gross income
     * `MonthlyIncome`: Monthly income
     * `NumberOfOpenCreditLinesAndLoans`: Number of Open loans (installment like car loan or mortgage) and Lines of credit (e.g. credit cards)
     * `NumberRealEstateLoansOrLines`: Number of mortgage and real estate loans including home equity lines of credit
