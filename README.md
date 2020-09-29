@@ -6,15 +6,15 @@ and an ETL data pipeline using Python, Spark, Airflow, S3 and Postgres (Redshift
 ## Purpose
 
 The purpose of this project is to provide credit risk analysts with a public database
-they can easily query and analyze to fine tune the rules used to give credit to applicants
-based on demongraphics, financial and delinquencies information of current accounts.
+they can query to fine tune the rules used to give credit to applicants
+based on demongraphics, financial and delinquencies information of current borrowers.
 
-The following are some questions that can be asked with the data:
+The following are some questions that can be answered by the data:
 
-* How many percent of customers under 30 years old have have had a serious delinquency?
+* How many percent of borrowers under 30 years old have have had a serious delinquency?
 * What is the average number of loans and open credit lines for homeowners?
-* How many percent of customers with two or more dependents have had a 30-59 days delinquency?
-* What is the average household income of customers with a 60-89 days delinquency?
+* How many percent of borrowers with two or more dependents have had a 30-59 days delinquency?
+* What is the average household income of borrowers with a 60-89 days delinquency?
 
 ## Setup
 
@@ -24,10 +24,10 @@ The following are some questions that can be asked with the data:
 * Set up Apache Airflow
 * Set up Spark
 * Install Pyspark Python module
-* Create the following Connections in Airflow
+* Create the following `Connections` in Airflow
 	* `redshift` : with the information necessary to connect to a redshift cluster
     * `aws_credentials` : with the credentials for an IAM user able to read and write to `<s3-bucket-name>`
-* Create the following Variables in Airflow
+* Create the following `Variables` in Airflow
 	* `bucket_name` : with the name of the bucket where the input data is uploaded and the stage data will be written
     * `number_of_rows`: the data quality checks needs this variable
 
@@ -93,7 +93,7 @@ This project generates five tables in a Postgres database:
 
 ```bash
 ├── README.md - This file.
-├── dags # Python script containing the tasks and depencdencies of the DAG
+├── dags
 	└── credilitycs.py # Python script containing the tasks and depencdencies of the DAG
 ├── plugins
 	├── helpers
