@@ -7,7 +7,7 @@ and an ETL data pipeline using Python, Spark, Airflow, S3 and Postgres (Redshift
 
 The purpose of this project is to provide credit risk analysts with a public database
 they can query to fine tune the rules used to give credit to applicants
-based on demongraphics, financial and delinquencies information of current borrowers.
+based on demographics, financial and delinquencies information of current borrowers.
 
 The following are some questions that can be answered by the data:
 
@@ -29,7 +29,7 @@ The following are some questions that can be answered by the data:
     * `aws_credentials` : with the credentials for an IAM user able to read and write to `<s3-bucket-name>`
 * Create the following `Variables` in Airflow
 	* `bucket_name` : with the name of the bucket where the input data is uploaded and the stage data will be written
-    * `number_of_rows`: the data quality checks needs this variable
+    * `number_of_rows`: the data quality checks need this variable
 
 ## Source Data
 
@@ -47,9 +47,9 @@ financial hardship. [Give Me Some Credit](https://www.kaggle.com/c/GiveMeSomeCre
 
 ## Data Model
 
-This project generates five tables in a Postgres database:
+This project connects to a Postgres database within a Redshift cluster and creates a five table star schema:
 
-1. `stage`: all data is loaded here first for rapid insertion into other tables
+1. `stage`: the data is loaded here first for rapid insertion into other tables
     * `SeriousDlqin2yrs`: Person experienced 90 days past due delinquency or worse 
     * `RevolvingUtilizationOfUnsecuredLines`: Total balance on credit cards and personal lines of credit except real estate and no installment debt like car loans divided by the sum of credit limits
     * `age`: Age of borrower in years
@@ -66,12 +66,12 @@ This project generates five tables in a Postgres database:
 2. `borrowers`: facts table storing the Id of each borrower
     * `BorrowerId`: identifier generated during transformation
     
-3. `demographics`: demographic information of each borrower
+3. `demographics`: dimension table storing demographic information of each borrower
     * `age`: Age of borrower in years
     * `NumberOfDependents`: Number of dependents in family excluding themselves (spouse, children etc.)
     * `BorrowerId`: identifier generated during transformation
     
-4. `finances`: financial information of each borrower
+4. `finances`: dimension table storing financial information of each borrower
     * `RevolvingUtilizationOfUnsecuredLines`: Total balance on credit cards and personal lines of credit except real estate and no installment debt like car loans divided by the sum of credit limits
     * `DebtRatio`: Monthly debt payments, alimony, living costs divided by monthy gross income
     * `MonthlyIncome`: Monthly income
@@ -79,7 +79,7 @@ This project generates five tables in a Postgres database:
     * `NumberRealEstateLoansOrLines`: Number of mortgage and real estate loans including home equity lines of credit
     * `BorrowerId`: identifier generated during transformation
     
-5. `delinquencies`: delinquency information of each borrower
+5. `delinquencies`: dimension table storing delinquency information of each borrower
     * `SeriousDlqin2yrs`: Person experienced 90 days past due delinquency or worse 
     * `NumberOfTime3059DaysPastDueNotWorse`: Number of times borrower has been 30-59 days past due but no worse in the last 2 years.
     * `NumberOfTimes90DaysLate`: Number of times borrower has been 90 days or more past due.
